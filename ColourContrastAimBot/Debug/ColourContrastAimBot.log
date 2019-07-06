@@ -2,4 +2,7 @@
   Source.cpp
 C:\Users\georg\CPSC\ColourContrastAimBot\ColourContrastAimBot\Source.cpp(71,29): warning C4244:  '=': conversion from 'double' to 'int', possible loss of data
 C:\Users\georg\CPSC\ColourContrastAimBot\ColourContrastAimBot\Source.cpp(72,29): warning C4244:  '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\georg\CPSC\ColourContrastAimBot\ColourContrastAimBot\Source.cpp(83,9): warning C4101:  'indexTOP': unreferenced local variable
+C:\Users\georg\CPSC\ColourContrastAimBot\ColourContrastAimBot\Source.cpp(81,9): warning C4101:  'indexLEFT': unreferenced local variable
+C:\Users\georg\CPSC\ColourContrastAimBot\ColourContrastAimBot\Source.cpp(82,9): warning C4101:  'indexRIGHT': unreferenced local variable
   ColourContrastAimBot.vcxproj -> C:\Users\georg\CPSC\ColourContrastAimBot\ColourContrastAimBot\Debug\ColourContrastAimBot.exe

@@ -50,7 +50,7 @@ bool Aim() {
 	a.y = 340;
 	b.x = 1160;
 	b.y = 740;
-	RGBQUAD * pixels;
+	RGBQUAD * pixels = new RGBQUAD[160000];
 	int red, redPrev;
 	int green, greenPrev;
 	int blue, bluePrev;
@@ -58,12 +58,12 @@ bool Aim() {
 	POINT targetPos;
 
 	double radius, angle, diffFactor;
-	diffFactor = 100;
+	diffFactor = 50;
 	int x, y, index;
 	
 	while (true) {
 		angle = 2 * 3.1415 / diffFactor;
-		radius = 1;
+		radius = 3;
 		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0) { // while rmb pressed
 
 			pixels = capture(a, b);
@@ -78,6 +78,9 @@ bool Aim() {
 					break;
 				}
 				index = y * 400 + x;
+				int indexLEFT;
+				int indexRIGHT;
+				int indexTOP;
 
 				red = (int)pixels[index].rgbRed;
 				green = (int)pixels[index].rgbGreen;
@@ -97,11 +100,12 @@ bool Aim() {
 
 				//cout << red << ", " << green << ", " << blue << endl;
 			}
+			delete[] pixels;
+
 
 		}
 		Sleep(40); // extra buffer time
 	}
-	//free(pixels);
 	return true;
 }
 
