@@ -44,30 +44,26 @@ RGBQUAD * capture(POINT a, POINT b) {
 	return pixels;
 }
 
-int getIndex(int x, int y) {
-	int index = y * 400 + x;
-	return index;
-}
-
 bool Aim() {
 	POINT a, b;
 	a.x = 760;
 	a.y = 340;
 	b.x = 1160;
 	b.y = 740;
+
 	RGBQUAD * pixels = new RGBQUAD[160000];
 	POINT targetPos;
 
-	int blue = 0, bluePrev;
-	int tolerance = 20;
-	double radius, angle, incFactor;
-	incFactor = 30;
-	int x, y, index; // scan coordinates
+	int red, redPrev;
+	int green, greenPrev;
+	int blue, bluePrev;
 
-	int targetHeight, targetLeft, targetRight;
+	double radius, angle, incFactor;
+	incFactor = 80;
+	int x, y, index; // scan coordinates
 	
 	while (true) {
-		angle = 2 * 3.1415 / incFactor;
+		angle = 3.1415;
 		radius = 3;
 		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0) { // while rmb pressed
 
@@ -78,60 +74,37 @@ bool Aim() {
 				angle += 2 * 3.1415 / incFactor;
 				radius += 1 / incFactor;
 
-				if (x < 46 || x > 353 || y < 46 || y > 353) {
+				if (x < 0 || x > 399 || y < 0 || y > 399) {
 					//cout << "OUT OF BOUNDS  " << x << "  " << y << endl;
 					break;
 				}
-				index = getIndex(x, y);
-				targetHeight = -1;
-				targetLeft = -1;
-				targetRight = -1;
-				bluePrev = (int)pixels[getIndex(x, y + 9)].rgbBlue;
-				for (int j = y + 10; j < 30; j+=2) { // top scan
-					blue = (int)pixels[getIndex(x, j)].rgbBlue;
-					if (abs(blue - bluePrev) > tolerance) {
-						targetHeight = j - y;
-						break;
-					}
+				index = y * 400 + x;
+
+				red = (int)pixels[index].rgbRed;
+				green = (int)pixels[index].rgbGreen;
+				blue = (int)pixels[index].rgbBlue;
+
+				if (i == 0) {
+					redPrev = red;
+					greenPrev = green;
 					bluePrev = blue;
 				}
-				//cout << blue << " bluePrev: " << bluePrev << " h: " << targetHeight << endl;
 
-				bluePrev = (int)pixels[getIndex(x - 9, y)].rgbBlue;
-				for (int k = x - 10; k > -30; k-=2) { // top scan
-					blue = (int)pixels[getIndex(k, y)].rgbBlue;
-					if (abs(blue - bluePrev) > tolerance) {
-						targetLeft = x - k;
-						break;
-					}
-					bluePrev = blue;
-				}
-				//cout << blue << " bluePrev: " << bluePrev << " l: " << targetLeft << endl;
-
-				bluePrev = (int)pixels[getIndex(x + 9, y)].rgbBlue;
-				for (int l = y + 10; l < 30; l+=2) { // top scan
-					blue = (int)pixels[getIndex(l, y)].rgbBlue;
-					if (abs(blue - bluePrev) > tolerance) {
-						targetRight = l - x;
-						break;
-					}
-					bluePrev = blue;
-				}
-				//cout << blue << " bluePrev: " << bluePrev << " r: " << targetRight << endl;
-
-				if (abs((targetRight - targetLeft) - targetHeight) < 5 && targetHeight != -1) {
+				if (//abs(red - redPrev) > 90 && 
+					//abs(green - greenPrev) > 90 && 
+					abs(blue - bluePrev) > 90) { // bright areas
 					targetPos.x = index % 400;
 					targetPos.y = index / 400;
-					mouse_event(MOUSEEVENTF_MOVE, targetPos.x - 200, targetPos.y - 200, 0, 0); // x and y are deltas, not abs coordinates
+					mouse_event(MOUSEEVENTF_MOVE, targetPos.x - 200, targetPos.y - 200 + 1, 0, 0); // x and y are deltas, not abs coordinates
 					break;
 				}
-
-				// scan distance will be 40
-				// top scan first, then right - left must equal top - center +/- 10
+				redPrev = red;
+				greenPrev = green;
+				bluePrev = blue;
 			}
 			delete[] pixels;
 		}
-		Sleep(50); // extra buffer time
+		Sleep(1);
 	}
 	return true;
 }
