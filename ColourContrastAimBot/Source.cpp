@@ -59,20 +59,21 @@ bool Aim() {
 	int blue, bluePrev;
 
 	double radius, angle, incFactor;
-	incFactor = 80;
+	incFactor = 100;
 	int x, y, index; // scan coordinates
+	int xp, yp;
 	
 	while (true) {
-		angle = 3.1415;
-		radius = 3;
+		angle = 0;
+		radius = 1;
 		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0) { // while rmb pressed
 
 			pixels = capture(a, b);
 			for (int i = 0; i < 160000; i++) {
 				x = radius * cos(angle) + 200;
 				y = radius * sin(angle) + 200;
-				angle += 2 * 3.1415 / incFactor;
-				radius += 1 / incFactor;
+				angle += 4 * 3.141592654 / incFactor;
+				radius += 0.01 / incFactor;
 
 				if (x < 0 || x > 399 || y < 0 || y > 399) {
 					//cout << "OUT OF BOUNDS  " << x << "  " << y << endl;
@@ -89,18 +90,25 @@ bool Aim() {
 					greenPrev = green;
 					bluePrev = blue;
 				}
+				if (i > 0 && (abs(xp-x) > 15 || abs(yp - y) > 15)) {
+					x = xp;
+					y = yp;
+				}
+				if (i > 0 && y < 0) {
+					y = y/2;
+				}
 
-				if (//abs(red - redPrev) > 90 && 
-					//abs(green - greenPrev) > 90 && 
-					abs(blue - bluePrev) > 90) { // bright areas
+				if ( abs(red - redPrev) > 50 && abs(green - greenPrev) > 50 && abs(blue - bluePrev) > 50 ) { // bright areas
 					targetPos.x = index % 400;
 					targetPos.y = index / 400;
-					mouse_event(MOUSEEVENTF_MOVE, targetPos.x - 200, targetPos.y - 200 + 1, 0, 0); // x and y are deltas, not abs coordinates
+					mouse_event(MOUSEEVENTF_MOVE, targetPos.x - 200, targetPos.y - 200, 0, 0); // x and y are deltas, not abs coordinates
 					break;
 				}
 				redPrev = red;
 				greenPrev = green;
 				bluePrev = blue;
+				xp = x;
+				yp = y;
 			}
 			delete[] pixels;
 		}
