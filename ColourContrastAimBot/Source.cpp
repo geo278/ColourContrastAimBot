@@ -52,7 +52,7 @@ bool Aim() {
 	b.y = 740;
 
 	RGBQUAD * pixels = new RGBQUAD[160000];
-	POINT targetPos;
+	POINT targetPos; // centered at top left corner of capture zone
 
 	int red, redPrev;
 	int green, greenPrev;
@@ -60,20 +60,20 @@ bool Aim() {
 
 	double radius, angle, incFactor;
 	incFactor = 100;
-	int x, y, index; // scan coordinates
+	int x, y, index; // centered at center of screen
 	int xp, yp;
 	
 	while (true) {
 		angle = 0;
 		radius = 1;
-		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0) { // while rmb pressed
+		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && !(GetKeyState(VK_SHIFT) & 0x8000)) { // while rmb pressed
 
 			pixels = capture(a, b);
 			for (int i = 0; i < 160000; i++) {
 				x = radius * cos(angle) + 200;
 				y = radius * sin(angle) + 200;
 				angle += 4 * 3.141592654 / incFactor;
-				radius += 0.01 / incFactor;
+				radius += 0.1 / incFactor;
 
 				if (x < 0 || x > 399 || y < 0 || y > 399) {
 					//cout << "OUT OF BOUNDS  " << x << "  " << y << endl;
@@ -94,11 +94,8 @@ bool Aim() {
 					x = xp;
 					y = yp;
 				}
-				if (i > 0 && y < 0) {
-					y = y/2;
-				}
 
-				if ( abs(red - redPrev) > 50 && abs(green - greenPrev) > 50 && abs(blue - bluePrev) > 50 ) { // bright areas
+				if ( abs(red - redPrev) > 45 && abs(green - greenPrev) > 45 && abs(blue - bluePrev) > 45 ) { // bright areas
 					targetPos.x = index % 400;
 					targetPos.y = index / 400;
 					mouse_event(MOUSEEVENTF_MOVE, targetPos.x - 200, targetPos.y - 200, 0, 0); // x and y are deltas, not abs coordinates
