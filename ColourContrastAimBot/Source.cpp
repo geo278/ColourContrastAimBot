@@ -62,11 +62,31 @@ bool Aim() {
 	incFactor = 100;
 	int x, y, index; // centered at center of screen
 	int xp, yp;
-	
+
+	int sampleR, sampleG, sampleB;
+	bool sampled = false;
 	while (true) {
-		angle = 0;
-		radius = 1;
-		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && !(GetKeyState(VK_SHIFT) & 0x8000)) { // while rmb pressed
+		angle = 2 * 3.141592654 / 8;
+		radius = 2;
+		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && (GetKeyState(VK_SHIFT) & 0x8000)) {
+			sampleR = 0;
+			sampleG = 0;
+			sampleB = 0;
+			pixels = capture(a, b);
+			for (int i = 0; i < 4; i++) {
+				x = radius * cos(angle) + 200;
+				y = radius * sin(angle) + 200;
+				angle += 2 * 3.141592654 / 4;
+				index = y * 400 + x;
+				sampleR += (int)pixels[index].rgbRed;
+				sampleG += (int)pixels[index].rgbGreen;
+				sampleB += (int)pixels[index].rgbBlue;
+			}
+			sampleR /= 4;
+			sampleG /= 4;
+			sampleB /= 4;
+			sampled = true;
+		} else if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && !(GetKeyState(VK_SHIFT) & 0x8000) && sampled) { // while rmb pressed
 
 			pixels = capture(a, b);
 			for (int i = 0; i < 160000; i++) {
@@ -74,6 +94,7 @@ bool Aim() {
 				y = radius * sin(angle) + 200;
 				angle += 4 * 3.141592654 / incFactor;
 				radius += 0.1 / incFactor;
+				index = y * 400 + x;
 
 				if (x < 0 || x > 399 || y < 0 || y > 399) {
 					//cout << "OUT OF BOUNDS  " << x << "  " << y << endl;
@@ -84,28 +105,26 @@ bool Aim() {
 				red = (int)pixels[index].rgbRed;
 				green = (int)pixels[index].rgbGreen;
 				blue = (int)pixels[index].rgbBlue;
-
+				/*
 				if (i == 0) {
 					redPrev = red;
 					greenPrev = green;
 					bluePrev = blue;
 				}
-				if (i > 0 && (abs(xp-x) > 15 || abs(yp - y) > 15)) {
-					x = xp;
-					y = yp;
-				}
-
-				if ( abs(red - redPrev) > 45 && abs(green - greenPrev) > 45 && abs(blue - bluePrev) > 45 ) { // bright areas
+				*/
+				if ( abs(red - sampleR) < 10 && abs(green - sampleG) < 10 && abs(blue - sampleB) < 10 ) { // bright areas
 					targetPos.x = index % 400;
 					targetPos.y = index / 400;
 					mouse_event(MOUSEEVENTF_MOVE, targetPos.x - 200, targetPos.y - 200, 0, 0); // x and y are deltas, not abs coordinates
 					break;
 				}
+				/*
 				redPrev = red;
 				greenPrev = green;
 				bluePrev = blue;
 				xp = x;
 				yp = y;
+				*/
 			}
 			delete[] pixels;
 		}
