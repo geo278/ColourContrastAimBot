@@ -86,14 +86,14 @@ bool Aim() {
 			sampleG /= 4;
 			sampleB /= 4;
 			sampled = true;
+			delete[] pixels;
 		} else if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && !(GetKeyState(VK_SHIFT) & 0x8000) && sampled) { // while rmb pressed
-
 			pixels = capture(a, b);
-			for (int i = 0; i < 160000; i++) {
+			for (int i = 0; i < 40000; i++) {
 				x = radius * cos(angle) + 200;
 				y = radius * sin(angle) + 200;
-				angle += 4 * 3.141592654 / incFactor;
-				radius += 0.1 / incFactor;
+				radius += 1 / incFactor;
+				angle += 1 / radius;
 				index = y * 400 + x;
 
 				if (x < 0 || x > 399 || y < 0 || y > 399) {
@@ -112,7 +112,7 @@ bool Aim() {
 					bluePrev = blue;
 				}
 				*/
-				if ( abs(red - sampleR) < 10 && abs(green - sampleG) < 10 && abs(blue - sampleB) < 10 ) { // bright areas
+				if ( abs(red - sampleR) < 5 && abs(green - sampleG) < 5 && abs(blue - sampleB) < 5 ) { // bright areas
 					targetPos.x = index % 400;
 					targetPos.y = index / 400;
 					mouse_event(MOUSEEVENTF_MOVE, targetPos.x - 200, targetPos.y - 200, 0, 0); // x and y are deltas, not abs coordinates
