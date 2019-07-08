@@ -71,7 +71,7 @@ bool Aim() {
 			for (int i = 0; i < 40000; i++) {
 				x = (int)(radius * cos(angle) + 200);
 				y = (int)(radius * sin(angle) + 200);
-				radius = radius + 0.1;
+				radius = radius + 0.05;
 				angle += 1 / radius;
 				index = y * 400 + x;
 
@@ -96,10 +96,10 @@ bool Aim() {
 				//cout << abs(red - sampleR) << " " << abs(green - sampleG) << " " << abs(blue - sampleB) << endl;
 				//cout << " " << endl;
 
-				if ( abs(red - redPrev) > 50 && abs(green - greenPrev) > 50 && abs(blue - bluePrev) > 50 ) { // bright areas
+				if ( red - redPrev > 10 && green - greenPrev > 10 && blue - bluePrev > 10) { // bright areas
 					targetPos.x = index % 400;
 					targetPos.y = index / 400;
-					mouse_event(MOUSEEVENTF_MOVE, targetPos.x - 201, targetPos.y - 201, 0, 0); // x and y are deltas, not abs coordinates
+					mouse_event(MOUSEEVENTF_MOVE, targetPos.x - 199, targetPos.y - 199, 0, 0); // x and y are deltas, not abs coordinates
 					//cout << "BREAK" << endl;
 					break;
 				}
@@ -113,7 +113,7 @@ bool Aim() {
 			}
 			delete[] pixels;
 		}
-		Sleep(1);
+		Sleep(5);
 	}
 	return true;
 }
