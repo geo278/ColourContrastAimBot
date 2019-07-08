@@ -1,12 +1,3 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(452,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (ColourContrastAimBot.vcxproj).  This can lead to incorrect clean and rebuild behavior.
   Source.cpp
-C:\Users\georg\CPSC\ColourContrastAimBot\ColourContrastAimBot\Source.cpp(77,29): warning C4244:  '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\georg\CPSC\ColourContrastAimBot\ColourContrastAimBot\Source.cpp(78,29): warning C4244:  '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\georg\CPSC\ColourContrastAimBot\ColourContrastAimBot\Source.cpp(93,29): warning C4244:  '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\georg\CPSC\ColourContrastAimBot\ColourContrastAimBot\Source.cpp(94,29): warning C4244:  '=': conversion from 'double' to 'int', possible loss of data
-C:\Users\georg\CPSC\ColourContrastAimBot\ColourContrastAimBot\Source.cpp(64,6): warning C4101:  'xp': unreferenced local variable
-C:\Users\georg\CPSC\ColourContrastAimBot\ColourContrastAimBot\Source.cpp(59,12): warning C4101:  'bluePrev': unreferenced local variable
-C:\Users\georg\CPSC\ColourContrastAimBot\ColourContrastAimBot\Source.cpp(64,10): warning C4101:  'yp': unreferenced local variable
-C:\Users\georg\CPSC\ColourContrastAimBot\ColourContrastAimBot\Source.cpp(58,13): warning C4101:  'greenPrev': unreferenced local variable
-C:\Users\georg\CPSC\ColourContrastAimBot\ColourContrastAimBot\Source.cpp(57,11): warning C4101:  'redPrev': unreferenced local variable
   ColourContrastAimBot.vcxproj -> C:\Users\georg\CPSC\ColourContrastAimBot\ColourContrastAimBot\Debug\ColourContrastAimBot.exe

@@ -54,45 +54,24 @@ bool Aim() {
 	RGBQUAD * pixels = new RGBQUAD[160000];
 	POINT targetPos; // centered at top left corner of capture zone
 
-	int red, redPrev;
-	int green, greenPrev;
-	int blue, bluePrev;
-
-	double radius, angle, incFactor;
-	incFactor = 100;
+	double radius, angle;
 	int x, y, index; // centered at center of screen
-	int xp, yp;
+	//int xp, yp;
 
-	int sampleR, sampleG, sampleB;
+	int red, green, blue;
+	int redPrev, greenPrev, bluePrev;
+	//int sampleR, sampleG, sampleB;
 	bool sampled = false;
+
 	while (true) {
 		angle = 2 * 3.141592654 / 8;
 		radius = 2;
-		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && (GetKeyState(VK_SHIFT) & 0x8000)) {
-			sampleR = 0;
-			sampleG = 0;
-			sampleB = 0;
-			pixels = capture(a, b);
-			for (int i = 0; i < 4; i++) {
-				x = radius * cos(angle) + 200;
-				y = radius * sin(angle) + 200;
-				angle += 2 * 3.141592654 / 4;
-				index = y * 400 + x;
-				sampleR += (int)pixels[index].rgbRed;
-				sampleG += (int)pixels[index].rgbGreen;
-				sampleB += (int)pixels[index].rgbBlue;
-			}
-			sampleR /= 4;
-			sampleG /= 4;
-			sampleB /= 4;
-			sampled = true;
-			delete[] pixels;
-		} else if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && !(GetKeyState(VK_SHIFT) & 0x8000) && sampled) { // while rmb pressed
+		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && !(GetKeyState(VK_SHIFT) & 0x8000)) { // while rmb pressed
 			pixels = capture(a, b);
 			for (int i = 0; i < 40000; i++) {
-				x = radius * cos(angle) + 200;
-				y = radius * sin(angle) + 200;
-				radius += 1 / incFactor;
+				x = (int)(radius * cos(angle) + 200);
+				y = (int)(radius * sin(angle) + 200);
+				radius = radius + 0.1;
 				angle += 1 / radius;
 				index = y * 400 + x;
 
@@ -105,26 +84,32 @@ bool Aim() {
 				red = (int)pixels[index].rgbRed;
 				green = (int)pixels[index].rgbGreen;
 				blue = (int)pixels[index].rgbBlue;
-				/*
+				
 				if (i == 0) {
 					redPrev = red;
 					greenPrev = green;
 					bluePrev = blue;
 				}
-				*/
-				if ( abs(red - sampleR) < 5 && abs(green - sampleG) < 5 && abs(blue - sampleB) < 5 ) { // bright areas
+				
+				//cout << angle / 2 / 3.1415 << " " << radius << endl;
+				//cout << red << " " << green << " " << blue << endl;
+				//cout << abs(red - sampleR) << " " << abs(green - sampleG) << " " << abs(blue - sampleB) << endl;
+				//cout << " " << endl;
+
+				if ( abs(red - redPrev) > 50 && abs(green - greenPrev) > 50 && abs(blue - bluePrev) > 50 ) { // bright areas
 					targetPos.x = index % 400;
 					targetPos.y = index / 400;
-					mouse_event(MOUSEEVENTF_MOVE, targetPos.x - 200, targetPos.y - 200, 0, 0); // x and y are deltas, not abs coordinates
+					mouse_event(MOUSEEVENTF_MOVE, targetPos.x - 201, targetPos.y - 201, 0, 0); // x and y are deltas, not abs coordinates
+					//cout << "BREAK" << endl;
 					break;
 				}
-				/*
+				
 				redPrev = red;
 				greenPrev = green;
 				bluePrev = blue;
-				xp = x;
-				yp = y;
-				*/
+				//xp = x;
+				//yp = y;
+				
 			}
 			delete[] pixels;
 		}
