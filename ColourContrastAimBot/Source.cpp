@@ -59,15 +59,18 @@ bool Aim() {
 	//int xp, yp;
 
 	int red, green, blue;
-	int redPrev, greenPrev, bluePrev;
+	//int redPrev, greenPrev, bluePrev;
 	//int sampleR, sampleG, sampleB;
 	bool sampled = false;
+	int brightest = 0;
 
 	while (true) {
 		angle = 2 * 3.141592654 / 8;
-		radius = 3;
+		radius = 2;
 		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && !(GetKeyState(VK_SHIFT) & 0x8000)) { // while rmb pressed
 			pixels = capture(a, b);
+			sampled = false;
+
 			for (int i = 0; i < 40000; i++) {
 				
 
@@ -87,40 +90,42 @@ bool Aim() {
 				green = (int)pixels[index].rgbGreen;
 				blue = (int)pixels[index].rgbBlue;
 				
-				if (i == 0) {
-					redPrev = red;
-					greenPrev = green;
-					bluePrev = blue;
+				if ((abs(red - 245) < 40 && abs(green - 160) < 40 && abs(blue - 70) < 40) ) {
+					brightest = red + green + blue;
+					targetPos.x = index % 400;
+					targetPos.y = index / 400;
+					sampled = true;
 				}
+
+				//if (i == 0) {
+				//	redPrev = red;
+				//	greenPrev = green;
+				//	bluePrev = blue;
+				//}
 				
 				//cout << angle / 2 / 3.1415 << " " << radius << endl;
 				//cout << red << " " << green << " " << blue << endl;
 				//cout << abs(red - sampleR) << " " << abs(green - sampleG) << " " << abs(blue - sampleB) << endl;
 				//cout << " " << endl;
 
-				if ( abs(red - redPrev) > 5 && abs(green - greenPrev) < 5 && abs(blue - bluePrev) < 5) { // bright areas
-					targetPos.x = index % 400;
-					targetPos.y = index / 400;
-					mouse_event(MOUSEEVENTF_MOVE, -(targetPos.x - 199), -(targetPos.y - 199), 0, 0); // x and y are deltas, not abs coordinates
+				if (i%16 == 0 && sampled) { // bright areas
+					//targetPos.x = index % 400;
+					//targetPos.y = index / 400;
+					mouse_event(MOUSEEVENTF_MOVE, (targetPos.x - 200), (targetPos.y - 199), 0, 0); // x and y are deltas, not abs coordinates
 					//cout << "BREAK" << endl;
 					break;
 				}
 				
-				redPrev = red;
-				greenPrev = green;
-				bluePrev = blue;
+				//redPrev = red;
+				//greenPrev = green;
+				//bluePrev = blue;
 				//xp = x;
 				//yp = y;
-
-				
-
-
-
 				
 			}
 			delete[] pixels;
 		}
-		Sleep(5);
+		Sleep(1);
 	}
 	return true;
 }
