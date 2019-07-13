@@ -6,6 +6,9 @@
 
 using namespace std;
 
+int width = 200;
+int height = 200;
+
 RGBQUAD * capture(POINT a, POINT b) {
 	// copy screen to bitmap
 	HDC     hScreen = GetDC(NULL);
@@ -14,26 +17,27 @@ RGBQUAD * capture(POINT a, POINT b) {
 	HGDIOBJ old_obj = SelectObject(hDC, hBitmap);
 	BOOL    bRet = BitBlt(hDC, 0, 0, abs(b.x - a.x), abs(b.y - a.y), hScreen, a.x, a.y, SRCCOPY); // BitBlt does the copying
 
+	/*
 	// save bitmap to clipboard
 	OpenClipboard(NULL);
 	EmptyClipboard();
 	SetClipboardData(CF_BITMAP, hBitmap);
 	CloseClipboard();
-
+	*/
 
 	// Array conversion:
-	RGBQUAD* pixels = new RGBQUAD[160000];
+	RGBQUAD* pixels = new RGBQUAD[width * height];
 
 	BITMAPINFOHEADER bmi = { 0 };
 	bmi.biSize = sizeof(BITMAPINFOHEADER);
 	bmi.biPlanes = 1;
 	bmi.biBitCount = 32;
-	bmi.biWidth = 400;
-	bmi.biHeight = -400;
+	bmi.biWidth = width;
+	bmi.biHeight = -height;
 	bmi.biCompression = BI_RGB;
 	bmi.biSizeImage = 0;// 3 * ScreenX * ScreenY;
 	
-	GetDIBits(hDC, hBitmap, 0, 400, pixels, (BITMAPINFO*)& bmi, DIB_RGB_COLORS);
+	GetDIBits(hDC, hBitmap, 0, height, pixels, (BITMAPINFO*)& bmi, DIB_RGB_COLORS);
 
 
 	// clean up
@@ -46,12 +50,12 @@ RGBQUAD * capture(POINT a, POINT b) {
 
 bool Aim() {
 	POINT a, b;
-	a.x = 760;
-	a.y = 340;
-	b.x = 1160;
-	b.y = 740;
+	a.x = 1920 / 2 - width / 2;
+	a.y = 1080 / 2 - height / 2;
+	b.x = 1920 / 2 + width / 2;
+	b.y = 1080 / 2 + height / 2;
 
-	RGBQUAD * pixels = new RGBQUAD[160000];
+	RGBQUAD * pixels;
 	POINT targetPos; // centered at top left corner of capture zone
 
 	double radius, angle;
@@ -74,17 +78,16 @@ bool Aim() {
 			for (int i = 0; i < 40000; i++) {
 				
 
-				x = (int)(radius * cos(angle) + 200);
-				y = (int)(radius * sin(angle) + 200);
+				x = (int)(radius * cos(angle) + width / 2);
+				y = (int)(radius * sin(angle) + height / 2);
 				radius = radius + 0.1;
 				angle += 1 / radius;
-				index = y * 400 + x;
+				index = y * width + x;
 
 				if (x < 0 || x > 399 || y < 0 || y > 399) {
 					//cout << "OUT OF BOUNDS  " << x << "  " << y << endl;
 					break;
 				}
-				index = y * 400 + x;
 
 				red = (int)pixels[index].rgbRed;
 				green = (int)pixels[index].rgbGreen;
@@ -92,8 +95,8 @@ bool Aim() {
 				
 				if ((abs(red - 245) < 40 && abs(green - 160) < 40 && abs(blue - 70) < 40) ) {
 					brightest = red + green + blue;
-					targetPos.x = index % 400;
-					targetPos.y = index / 400;
+					targetPos.x = index % width;
+					targetPos.y = index / width;
 					sampled = true;
 				}
 
@@ -109,9 +112,7 @@ bool Aim() {
 				//cout << " " << endl;
 
 				if (i%16 == 0 && sampled) { // bright areas
-					//targetPos.x = index % 400;
-					//targetPos.y = index / 400;
-					mouse_event(MOUSEEVENTF_MOVE, (targetPos.x - 200), (targetPos.y - 199), 0, 0); // x and y are deltas, not abs coordinates
+					mouse_event(MOUSEEVENTF_MOVE, (targetPos.x - width / 2), (targetPos.y - height / 2), 0, 0); // x and y are deltas, not abs coordinates
 					//cout << "BREAK" << endl;
 					break;
 				}
