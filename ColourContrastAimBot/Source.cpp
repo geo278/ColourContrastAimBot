@@ -60,24 +60,28 @@ bool Aim() {
 
 	double radius, angle;
 	int x, y, index; // centered at center of screen
-	//int xp, yp;
-
 	int red, green, blue;
-	//int redPrev, greenPrev, bluePrev;
-	//int sampleR, sampleG, sampleB;
+	int sampleR = 245, sampleG = 160, sampleB = 70; // nc infravision
+	// int sampleR = 180, sampleG = 160, sampleB = 130; // corona ir values
+	// int sampleR = 255, sampleG = 145, sampleB = 57; // vs infravision
+	// int sampleR = 145, sampleG = 145, sampleB = 145; // tr irnv values
+
 	bool sampled = false;
 	int brightest = 0;
 
 	while (true) {
 		angle = 2 * 3.141592654 / 8;
 		radius = 2;
+		//0x39
+		if ((GetKeyState(0x39) & 0x100) != 0) { // while key 9 pressed
+			// sample colors
+			// cout << "reached" << endl;
+		}
 		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && !(GetKeyState(VK_SHIFT) & 0x8000)) { // while rmb pressed
 			pixels = capture(a, b);
 			sampled = false;
 
 			for (int i = 0; i < 40000; i++) {
-				
-
 				x = (int)(radius * cos(angle) + width / 2);
 				y = (int)(radius * sin(angle) + height / 2);
 				radius = radius + 0.1;
@@ -93,19 +97,13 @@ bool Aim() {
 				green = (int)pixels[index].rgbGreen;
 				blue = (int)pixels[index].rgbBlue;
 				
-				if ((abs(red - 245) < 40 && abs(green - 160) < 40 && abs(blue - 70) < 40) ) {
+				if ((abs(red - sampleR) < 35 && abs(green - sampleG) < 35 && abs(blue - sampleB) < 35) ) {
 					brightest = red + green + blue;
 					targetPos.x = index % width;
 					targetPos.y = index / width;
 					sampled = true;
 				}
 
-				//if (i == 0) {
-				//	redPrev = red;
-				//	greenPrev = green;
-				//	bluePrev = blue;
-				//}
-				
 				//cout << angle / 2 / 3.1415 << " " << radius << endl;
 				//cout << red << " " << green << " " << blue << endl;
 				//cout << abs(red - sampleR) << " " << abs(green - sampleG) << " " << abs(blue - sampleB) << endl;
@@ -116,12 +114,6 @@ bool Aim() {
 					//cout << "BREAK" << endl;
 					break;
 				}
-				
-				//redPrev = red;
-				//greenPrev = green;
-				//bluePrev = blue;
-				//xp = x;
-				//yp = y;
 				
 			}
 			delete[] pixels;
