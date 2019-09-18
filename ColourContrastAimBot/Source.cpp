@@ -61,14 +61,16 @@ bool Aim() {
 	double radius, angle;
 	int x, y, index; // centered at center of screen
 	int red, green, blue;
-	// int sampleR = 255, sampleG = 170, sampleB = 80; // nc infravision
-	// int sampleR = 255, sampleG = 145, sampleB = 57; // vs infravision
-	int sampleR = 180, sampleG = 160, sampleB = 130; // corona ir values
-	// int sampleR = 145, sampleG = 145, sampleB = 145; // tr irnv values
 
+
+	/*
+	// bright colour thermals
+		int sampleR = 255, sampleG = 170, sampleB = 80; // nc infravision
+	// int sampleR = 255, sampleG = 145, sampleB = 57; // vs infravision
+	// int sampleR = 180, sampleG = 160, sampleB = 130; // corona ir values
+	// int sampleR = 145, sampleG = 145, sampleB = 145; // tr irnv values
 	bool sampled = false;
 	int brightest = 0;
-
 	while (true) {
 		angle = 2 * 3.141592654 / 8;
 		radius = 2;
@@ -93,10 +95,13 @@ bool Aim() {
 				red = (int)pixels[index].rgbRed;
 				green = (int)pixels[index].rgbGreen;
 				blue = (int)pixels[index].rgbBlue;
-				if (red > 250 && green + blue < 10 || green > 250 & red + blue < 10 || blue > 250 & red + green < 10) {
-					break;
-				}
-				if ((abs(red - sampleR) < 30 && abs(green - sampleG) < 30 && abs(blue - sampleB) < 30) || (255 - red < 10 && 255 - green < 10 && 255 - blue < 10) ) {
+				//if (red > 250 && green + blue < 10 || green > 250 & red + blue < 10 || blue > 250 & red + green < 10) {
+				//	break;
+				//}
+				if ((abs(red - sampleR) < 30 && abs(green - sampleG) < 30 && abs(blue - sampleB) < 30) 
+				//	|| (255 - red < 10 && 255 - green < 10 && 255 - blue < 10) 
+					) 
+				{
 					brightest = red + green + blue;
 					targetPos.x = index % width;
 					targetPos.y = index / width;
@@ -109,6 +114,31 @@ bool Aim() {
 				//cout << " " << endl;
 
 				if (i%16 == 0 && sampled) { // bright areas
+					mouse_event(MOUSEEVENTF_MOVE, (targetPos.x - width / 2), (targetPos.y - height / 2), 0, 0); // x and y are deltas, not abs coordinates
+					//cout << "BREAK" << endl;
+					break;
+				}
+			}
+			delete[] pixels;
+		}
+		Sleep(1);
+	}
+		*/
+
+	while (true) {
+		angle = 2 * 3.141592654 / 8;
+		radius = 2;
+		// if ((GetKeyState(0x39) & 0x100) != 0) { // while key 9 pressed
+			// sample colors
+			// cout << "reached" << endl;
+		// }
+		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && !(GetKeyState(VK_SHIFT) & 0x8000)) { // while rmb pressed
+			pixels = capture(a, b);
+
+			for (int i = 0; i < sampleCount * width; i++) {
+
+
+				if (i % 16 == 0) { // found outline
 					mouse_event(MOUSEEVENTF_MOVE, (targetPos.x - width / 2), (targetPos.y - height / 2), 0, 0); // x and y are deltas, not abs coordinates
 					//cout << "BREAK" << endl;
 					break;
