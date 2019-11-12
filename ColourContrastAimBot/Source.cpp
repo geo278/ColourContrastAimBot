@@ -47,7 +47,7 @@ RGBQUAD * capture(POINT a, POINT b) {
 	return pixels;
 }
 
-bool Aim() {
+void Aim() {
 	POINT a, b;
 	a.x = 1920 / 2 - width / 2;
 	a.y = 1080 / 2 - height / 2;
@@ -56,56 +56,53 @@ bool Aim() {
 
 	RGBQUAD * pixels;
 	POINT targetPos; // centered at top left corner of capture zone
-
-	int sampleCount = 8;
-	double radius, angle;
-	int x, y, index; // centered at center of screen
-	int red, green, blue;
-
-
-	/*
+	
 	// bright colour thermals
-		int sampleR = 255, sampleG = 170, sampleB = 80; // nc infravision
+	// int sampleR = 255, sampleG = 170, sampleB = 80; // nc infravision
 	// int sampleR = 255, sampleG = 145, sampleB = 57; // vs infravision
 	// int sampleR = 180, sampleG = 160, sampleB = 130; // corona ir values
 	// int sampleR = 145, sampleG = 145, sampleB = 145; // tr irnv values
-	bool sampled = false;
-	int brightest = 0;
+
+	int targetR = 250, targetG = 250, targetB = 250; // bf4 2x irnv
+
+	int sampleCount = 16;
+	double radius, angle;
+	int x, y, index; // 0 indexed from top left
+	int red, green, blue;
+
+	bool targetAcquired = false;
+	bool evadeCrosshairColour = false;
+	// int brightest = 0;
 	while (true) {
 		angle = 2 * 3.141592654 / 8;
-		radius = 2;
-		// if ((GetKeyState(0x39) & 0x100) != 0) { // while key 9 pressed
-			// sample colors
-			// cout << "reached" << endl;
-		// }
-		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && !(GetKeyState(VK_SHIFT) & 0x8000)) { // while rmb pressed
+		radius = 4;
+		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && !(GetKeyState(VK_SHIFT) & 0x8000)) { // while rmb pressed, shift not pressed
 			pixels = capture(a, b);
-			sampled = false;
-			for (int i = 0; i < sampleCount * width; i++) {
+			targetAcquired = false;
+			evadeCrosshairColour = false;
+			for (int i = 0; i < sampleCount * width; i++) { // need to evade 6x6 grid in center of screen, accept 55x, 44y
 				x = (int)(radius * cos(angle) + width / 2);
 				y = (int)(radius * sin(angle) + height / 2);
-				if (i % sampleCount == 0) {
-					radius++;
+				if (i % sampleCount == 0) { // if ring is complete
+					radius++; // increment radius
 				}
-				angle += 2 * 3.141592654 / sampleCount;
-				index = y * width + x;
-				if (x < 0 || x > 399 || y < 0 || y > 399) {
+				angle += 2 * 3.141592654 / sampleCount; // increment angle per iteration
+				index = y * width + x; // get 1d array index
+				if (x < 0 || x > 399 || y < 0 || y > 399) { // boundary check
 					break;
+				}
+				if (radius > 45 && (abs(width / 2 - x) <= 2 || abs(height / 2 - y) <= 2)) { 
+					evadeCrosshairColour = true;
 				}
 				red = (int)pixels[index].rgbRed;
 				green = (int)pixels[index].rgbGreen;
 				blue = (int)pixels[index].rgbBlue;
-				//if (red > 250 && green + blue < 10 || green > 250 & red + blue < 10 || blue > 250 & red + green < 10) {
-				//	break;
-				//}
-				if ((abs(red - sampleR) < 30 && abs(green - sampleG) < 30 && abs(blue - sampleB) < 30) 
-				//	|| (255 - red < 10 && 255 - green < 10 && 255 - blue < 10) 
-					) 
-				{
-					brightest = red + green + blue;
+
+				if ((abs(red - targetR) < 30 && abs(green - targetG) < 30 && abs(blue - targetB) < 30) && !evadeCrosshairColour) {// if within target colour range
+					// brightest = red + green + blue;
 					targetPos.x = index % width;
 					targetPos.y = index / width;
-					sampled = true;
+					targetAcquired = true;
 				}
 
 				//cout << angle / 2 / 3.1415 << " " << radius << endl;
@@ -113,9 +110,8 @@ bool Aim() {
 				//cout << abs(red - sampleR) << " " << abs(green - sampleG) << " " << abs(blue - sampleB) << endl;
 				//cout << " " << endl;
 
-				if (i%16 == 0 && sampled) { // bright areas
+				if (i % sampleCount == 0 && targetAcquired) { // if ring is complete and targetAcquired
 					mouse_event(MOUSEEVENTF_MOVE, (targetPos.x - width / 2), (targetPos.y - height / 2), 0, 0); // x and y are deltas, not abs coordinates
-					//cout << "BREAK" << endl;
 					break;
 				}
 			}
@@ -123,8 +119,8 @@ bool Aim() {
 		}
 		Sleep(1);
 	}
-		*/
 
+/*
 	while (true) {
 		angle = 2 * 3.141592654 / 8;
 		radius = 2;
@@ -148,7 +144,7 @@ bool Aim() {
 		}
 		Sleep(1);
 	}
-	return true;
+*/
 }
 
 int main() {
