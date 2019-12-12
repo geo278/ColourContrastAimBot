@@ -6,7 +6,7 @@
 
 using namespace std;
 
-POINT a, b;
+POINT a, b; // top left and bottom right corners
 int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 int width = 280;
@@ -83,7 +83,7 @@ void Aim() {
 	while (true) {
 		// angle = 2 * 3.141592654 / 8;
 		angle = 2 * 3.141592654 * 3 / 4;
-		radius = 2;
+		radius = 1;
 		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && !(GetKeyState(VK_CAPITAL) & 0x8000)) { // while rmb pressed, shift not pressed
 			pixels = capture(a, b);
 			targetAcquired = false;
