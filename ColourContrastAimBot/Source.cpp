@@ -9,8 +9,8 @@ using namespace std;
 POINT a, b;
 int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-int width = 300;
-int height = 300;
+int width = 280;
+int height = 280;
 
 RGBQUAD * capture(POINT a, POINT b) {
 	// copy screen to bitmap
@@ -50,6 +50,13 @@ RGBQUAD * capture(POINT a, POINT b) {
 	return pixels;
 }
 
+void shoot() {
+	mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0); // start left click
+	Sleep(10);
+	mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0); // finish Left click
+	Sleep(10);
+}
+
 void Aim() {
 	RGBQUAD * pixels;
 	POINT targetPos; // centered at top left corner of capture zone
@@ -59,11 +66,11 @@ void Aim() {
 	// int sampleR = 255, sampleG = 145, sampleB = 57; // vs infravision
 	// int sampleR = 180, sampleG = 160, sampleB = 130; // corona ir values
 	// int sampleR = 145, sampleG = 145, sampleB = 145; // tr irnv values
-
 	// int targetR = 250, targetG = 250, targetB = 250; // bf4 2x irnv
 
 	int targetR = 180, targetG = 186, targetB = 65; // r6 glaz green highlight
-
+	int reboundCount = 0;
+	int reboundMax = 3;
 	int sampleCount = 16;
 	double radius, angle;
 	int x, y, index; // 0 indexed from top left
@@ -74,7 +81,8 @@ void Aim() {
 	//bool evadeCrosshairColour = false;
 	// int brightest = 0;
 	while (true) {
-		angle = 2 * 3.141592654 / 8;
+		// angle = 2 * 3.141592654 / 8;
+		angle = 2 * 3.141592654 * 3 / 4;
 		radius = 2;
 		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && !(GetKeyState(VK_SHIFT) & 0x8000)) { // while rmb pressed, shift not pressed
 			pixels = capture(a, b);
@@ -116,13 +124,21 @@ void Aim() {
 				if (i % sampleCount == 0 && targetAcquired) { // if ring is complete and targetAcquired
 					int xAdjust = (targetPos.x - width / 2);
 					int yAdjust = (targetPos.y - height / 2);
-					//if (abs(xAdjust) > radius) { xAdjust /= radius; }
-					//else if (xAdjust > 0) { xAdjust = 1; }
-					//else if (xAdjust < 0) { xAdjust = -1; }
-					//if (abs(yAdjust) > radius) { yAdjust /= radius; }
-					//else if (yAdjust > 0) { yAdjust = 1; }
-					//else if (yAdjust < 0) { yAdjust = -1; }
+					// if (abs(xAdjust) > radius) { xAdjust /= radius; }
+					// else if (xAdjust > 0) { xAdjust = 1; }
+					// else if (xAdjust < 0) { xAdjust = -1; }
+					// if (abs(yAdjust) > radius) { yAdjust /= radius; }
+					// else if (yAdjust > 0) { yAdjust = 1; }
+					// else if (yAdjust < 0) { yAdjust = -1; }
 					mouse_event(MOUSEEVENTF_MOVE, xAdjust, yAdjust, 0, 0); // x and y are deltas, not abs coordinates
+					if (reboundCount < reboundMax) {
+						reboundCount++;
+					} else {
+						reboundCount = 0;
+					}
+					if ((GetKeyState(VK_CONTROL) & 0x100) != 0 && reboundCount == reboundMax) {
+						CreateThread(0, 0, (LPTHREAD_START_ROUTINE) shoot, 0, 0, 0);
+					}
 					break;
 				}
 			}
