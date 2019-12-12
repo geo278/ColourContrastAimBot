@@ -59,7 +59,7 @@ void shoot() {
 
 void Aim() {
 	RGBQUAD * pixels;
-	POINT targetPos; // centered at top left corner of capture zone
+	// POINT targetPos; // centered at top left corner of capture zone
 	
 	// bright colour thermals
 	// int sampleR = 255, sampleG = 170, sampleB = 80; // nc infravision
@@ -68,7 +68,7 @@ void Aim() {
 	// int sampleR = 145, sampleG = 145, sampleB = 145; // tr irnv values
 	// int targetR = 250, targetG = 250, targetB = 250; // bf4 2x irnv
 
-	int targetR = 180, targetG = 186, targetB = 65; // r6 glaz green highlight
+	int targetR = 180, targetG = 188, targetB = 65; // r6 glaz green highlight
 	int reboundCount = 0;
 	int reboundMax = 3;
 	int sampleCount = 16;
@@ -107,12 +107,12 @@ void Aim() {
 				blue = (int)pixels[index].rgbBlue;
 
 				if ((abs(red - targetR) < tolerance && abs(green - targetG) < tolerance && abs(blue - targetB) < tolerance) &&
-					(abs(red - green) - abs(targetR - targetG) < tolerance / 2 && 
-					abs(green - blue) - abs(targetG - targetB) < tolerance / 2 && 
-					abs(blue - red) - abs(targetB - targetR) < tolerance / 2)) {// if within target colour range
+					(abs(red - green) - abs(targetR - targetG) < (tolerance / 2 - 2) && 
+					abs(green - blue) - abs(targetG - targetB) < (tolerance / 2 - 2) && 
+					abs(blue - red) - abs(targetB - targetR) < (tolerance / 2 - 2))) {// if within target colour range
 					// brightest = red + green + blue;
-					targetPos.x = index % width;
-					targetPos.y = index / width;
+					//targetPos.x = index % width;
+					//targetPos.y = index / width;
 					targetAcquired = true;
 				}
 
@@ -122,8 +122,8 @@ void Aim() {
 				//cout << " " << endl;
 
 				if (i % sampleCount == 0 && targetAcquired) { // if ring is complete and targetAcquired
-					int xAdjust = (targetPos.x - width / 2);
-					int yAdjust = (targetPos.y - height / 2);
+					int xAdjust = (x - width / 2);
+					int yAdjust = (y - height / 2);
 					// if (abs(xAdjust) > radius) { xAdjust /= radius; }
 					// else if (xAdjust > 0) { xAdjust = 1; }
 					// else if (xAdjust < 0) { xAdjust = -1; }
