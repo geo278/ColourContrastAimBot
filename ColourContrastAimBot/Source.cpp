@@ -9,8 +9,8 @@ using namespace std;
 POINT a, b; // top left and bottom right corners
 int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-int width = 280;
-int height = 280;
+const int width = 280;
+const int height = 280;
 
 RGBQUAD * capture(POINT a, POINT b) {
 	// copy screen to bitmap
@@ -68,14 +68,12 @@ void Aim() {
 	// int sampleR = 145, sampleG = 145, sampleB = 145; // tr irnv values
 	// int targetR = 250, targetG = 250, targetB = 250; // bf4 2x irnv
 
-	int targetR = 180, targetG = 188, targetB = 65; // r6 glaz green highlight
+	const int targetR = 180, targetG = 188, targetB = 65; // r6 glaz green highlight
 	int reboundCount = 0;
-	int reboundMax = 3;
-	int sampleCount = 16;
+	const int sampleCount = 16, tolerance = 30, reboundMax = 3;
 	double radius, angle;
 	int x, y, index; // 0 indexed from top left
 	int red, green, blue;
-	int tolerance = 30;
 
 	bool targetAcquired = false;
 	//bool evadeCrosshairColour = false;
@@ -106,10 +104,12 @@ void Aim() {
 				green = (int)pixels[index].rgbGreen;
 				blue = (int)pixels[index].rgbBlue;
 
-				if ((abs(red - targetR) < tolerance && abs(green - targetG) < tolerance && abs(blue - targetB) < tolerance) &&
-					(abs(red - green) - abs(targetR - targetG) < (tolerance / 2 - 2) && 
+				if ((abs(red - targetR) < tolerance && // each colour within range
+					abs(green - targetG) < tolerance && 
+					abs(blue - targetB) < tolerance) &&
+					(abs(red - green) - abs(targetR - targetG) < (tolerance / 2 - 2) && // relative hue shift in range
 					abs(green - blue) - abs(targetG - targetB) < (tolerance / 2 - 2) && 
-					abs(blue - red) - abs(targetB - targetR) < (tolerance / 2 - 2))) {// if within target colour range
+					abs(blue - red) - abs(targetB - targetR) < (tolerance / 2 - 2))) {
 					// brightest = red + green + blue;
 					//targetPos.x = index % width;
 					//targetPos.y = index / width;
