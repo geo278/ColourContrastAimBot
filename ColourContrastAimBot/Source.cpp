@@ -6,6 +6,9 @@
 
 using namespace std;
 
+POINT a, b;
+int screenWidth = GetSystemMetrics(SM_CXSCREEN);
+int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 int width = 160;
 int height = 160;
 
@@ -48,12 +51,6 @@ RGBQUAD * capture(POINT a, POINT b) {
 }
 
 void Aim() {
-	POINT a, b;
-	a.x = 1920 / 2 - width / 2;
-	a.y = 1080 / 2 - height / 2;
-	b.x = 1920 / 2 + width / 2;
-	b.y = 1080 / 2 + height / 2;
-
 	RGBQUAD * pixels;
 	POINT targetPos; // centered at top left corner of capture zone
 	
@@ -63,7 +60,9 @@ void Aim() {
 	// int sampleR = 180, sampleG = 160, sampleB = 130; // corona ir values
 	// int sampleR = 145, sampleG = 145, sampleB = 145; // tr irnv values
 
-	int targetR = 250, targetG = 250, targetB = 250; // bf4 2x irnv
+	// int targetR = 250, targetG = 250, targetB = 250; // bf4 2x irnv
+
+	int targetR = 180, targetG = 186, targetB = 65; // r6 glaz green highlight
 
 	int sampleCount = 16;
 	double radius, angle;
@@ -71,15 +70,15 @@ void Aim() {
 	int red, green, blue;
 
 	bool targetAcquired = false;
-	bool evadeCrosshairColour = false;
+	//bool evadeCrosshairColour = false;
 	// int brightest = 0;
 	while (true) {
 		angle = 2 * 3.141592654 / 8;
-		radius = 4;
+		radius = 2;
 		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && !(GetKeyState(VK_SHIFT) & 0x8000)) { // while rmb pressed, shift not pressed
 			pixels = capture(a, b);
 			targetAcquired = false;
-			evadeCrosshairColour = false;
+			//evadeCrosshairColour = false;
 			for (int i = 0; i < sampleCount * width; i++) { // need to evade 6x6 grid in center of screen, accept 55x, 44y
 				x = (int)(radius * cos(angle) + width / 2);
 				y = (int)(radius * sin(angle) + height / 2);
@@ -91,14 +90,14 @@ void Aim() {
 				if (x < 0 || x > 399 || y < 0 || y > 399) { // boundary check
 					break;
 				}
-				if (radius > 45 && (abs(width / 2 - x) <= 2 || abs(height / 2 - y) <= 2)) { 
-					evadeCrosshairColour = true;
-				}
+				//if (radius > 45 && (abs(width / 2 - x) <= 2 || abs(height / 2 - y) <= 2)) { 
+				//	evadeCrosshairColour = true;
+				//}
 				red = (int)pixels[index].rgbRed;
 				green = (int)pixels[index].rgbGreen;
 				blue = (int)pixels[index].rgbBlue;
 
-				if ((abs(red - targetR) < 30 && abs(green - targetG) < 30 && abs(blue - targetB) < 30) && !evadeCrosshairColour) {// if within target colour range
+				if ((abs(red - targetR) < 30 && abs(green - targetG) < 30 && abs(blue - targetB) < 30) ) {// if within target colour range
 					// brightest = red + green + blue;
 					targetPos.x = index % width;
 					targetPos.y = index / width;
@@ -111,7 +110,7 @@ void Aim() {
 				//cout << " " << endl;
 
 				if (i % sampleCount == 0 && targetAcquired) { // if ring is complete and targetAcquired
-					mouse_event(MOUSEEVENTF_MOVE, (targetPos.x - width / 2), (targetPos.y - height / 2), 0, 0); // x and y are deltas, not abs coordinates
+					mouse_event(MOUSEEVENTF_MOVE, (targetPos.x - width / 2)/2, (targetPos.y - height / 2)/2, 0, 0); // x and y are deltas, not abs coordinates
 					break;
 				}
 			}
@@ -146,8 +145,20 @@ void Aim() {
 	}
 */
 }
+void updateResolution() {
+	while (1) {
+		screenWidth = GetSystemMetrics(SM_CXSCREEN);
+		screenHeight = GetSystemMetrics(SM_CYSCREEN);
+		a.x = screenWidth / 2 - width / 2;
+		a.y = screenHeight / 2 - height / 2;
+		b.x = screenWidth / 2 + width / 2;
+		b.y = screenHeight / 2 + height / 2;
+		Sleep(10000);
+	}
+}
 
 int main() {
+	CreateThread(0, 0, (LPTHREAD_START_ROUTINE) updateResolution, 0, 0, 0);
 	Aim();
 	return 0;
 }
