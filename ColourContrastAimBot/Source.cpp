@@ -3,6 +3,7 @@
 //#include "scan.h"
 #include "iostream"
 #include "Windows.h"
+#include "vector"
 
 using namespace std;
 
@@ -57,19 +58,59 @@ void shoot() {
 	Sleep(10);
 }
 
+bool checkColour(RGBQUAD sample, vector<RGBQUAD> targets) {
+	bool result = false;
+	int tolerance = 12;
+	int sampleRed = (int)sample.rgbRed;
+	int sampleGreen = (int)sample.rgbGreen;
+	int sampleBlue = (int)sample.rgbBlue;
+	int targetRed, targetGreen, targetBlue;
+	for (int i = 0; i < targets.size(); i++) {
+		targetRed = targets[i].rgbRed;
+		targetGreen = targets[i].rgbGreen;
+		targetBlue = targets[i].rgbBlue;
+		if (abs(sampleRed - targetRed) < tolerance && 
+			abs(sampleGreen - targetGreen) < tolerance &&
+			//(sampleGreen - sampleRed) < 10 && (sampleGreen - sampleRed) > 0 &&
+			abs(sampleBlue - targetBlue) < tolerance * 2 / 3 ) {
+			result = true;
+			break;
+		}
+	}
+	return result;
+}
+
 void Aim() {
 	RGBQUAD * pixels;
-	// POINT targetPos; // centered at top left corner of capture zone
-	
-	// bright colour thermals
-	// int sampleR = 255, sampleG = 170, sampleB = 80; // nc infravision
-	// int sampleR = 255, sampleG = 145, sampleB = 57; // vs infravision
-	// int sampleR = 180, sampleG = 160, sampleB = 130; // corona ir values
-	// int sampleR = 145, sampleG = 145, sampleB = 145; // tr irnv values
-	// int targetR = 250, targetG = 250, targetB = 250; // bf4 2x irnv
+	POINT targetPos; // centered at top left corner of capture zone
 
-	const int targetR = 180, targetG = 188, targetB = 65; // r6 glaz green highlight
-	const int sampleCount = 16, tolerance = 30, reboundMax = 3;
+	vector<RGBQUAD> targets = {};
+	RGBQUAD target;
+	target.rgbRed = 145, target.rgbGreen = 162, target.rgbBlue = 47;
+	targets.push_back(target);
+	target.rgbRed = 150, target.rgbGreen = 155, target.rgbBlue = 60;
+	targets.push_back(target);
+	target.rgbRed = 173, target.rgbGreen = 177, target.rgbBlue = 60;
+	targets.push_back(target);
+	target.rgbRed = 189, target.rgbGreen = 198,	target.rgbBlue = 74;
+	targets.push_back(target);
+	target.rgbRed = 197, target.rgbGreen = 203, target.rgbBlue = 161;
+	targets.push_back(target);
+	target.rgbRed = 194, target.rgbGreen = 193, target.rgbBlue = 141;
+	targets.push_back(target);
+	target.rgbRed = 181, target.rgbGreen = 189, target.rgbBlue = 123;
+	targets.push_back(target);
+
+	// 173 167 130
+
+	// bright colour thermals
+// int sampleR = 255, sampleG = 170, sampleB = 80; // nc infravision
+// int sampleR = 255, sampleG = 145, sampleB = 57; // vs infravision
+// int sampleR = 180, sampleG = 160, sampleB = 130; // corona ir values
+// int sampleR = 145, sampleG = 145, sampleB = 145; // tr irnv values
+// int targetR = 250, targetG = 250, targetB = 250; // bf4 2x irnv
+	
+	const int sampleCount = 16, reboundMax = 3;
 	double radius, angle;
 	int reboundCount = 0;
 	int x, y, index, xAdjust, yAdjust; // 0 indexed from top left
@@ -82,7 +123,7 @@ void Aim() {
 		// angle = 2 * 3.141592654 / 8;
 		angle = 2 * 3.141592654 * 3 / 4;
 		radius = 1;
-		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && !(GetKeyState(VK_CAPITAL) & 0x8000)) { // while rmb pressed, shift not pressed
+		if ((GetKeyState(VK_CONTROL) & 0x100) != 0 && !(GetKeyState(VK_CAPITAL) & 0x8000)) { // while rmb pressed, shift not pressed
 			pixels = capture(a, b);
 			targetAcquired = false;
 			//evadeCrosshairColour = false;
@@ -100,38 +141,23 @@ void Aim() {
 				//	evadeCrosshairColour = true;
 				//}
 				index = y * width + x; // get 1d array index
-				red = (int)pixels[index].rgbRed;
-				green = (int)pixels[index].rgbGreen;
-				blue = (int)pixels[index].rgbBlue;
+				//red = (int)pixels[index].rgbRed;
+				//green = (int)pixels[index].rgbGreen;
+				//blue = (int)pixels[index].rgbBlue;
 
-				if ((abs(red - targetR) < tolerance && // each colour within range
-					abs(green - targetG) < tolerance && 
-					abs(blue - targetB) < tolerance) &&
-					(abs(abs(red - green) - abs(targetR - targetG)) < (tolerance / 2 - 2) && // relative hue shift in range
-					abs(abs(green - blue) - abs(targetG - targetB)) < (tolerance / 2 - 2) && 
-					abs(abs(blue - red) - abs(targetB - targetR)) < (tolerance / 2 - 2))) {
+				if (checkColour(pixels[index], targets)) {
 					// brightest = red + green + blue;
-					//targetPos.x = index % width;
-					//targetPos.y = index / width;
+					targetPos.x = index % width;
+					targetPos.y = index / width;
 					targetAcquired = true;
 				}
 
-				//cout << angle / 2 / 3.1415 << " " << radius << endl;
-				//cout << red << " " << green << " " << blue << endl;
-				//cout << abs(red - sampleR) << " " << abs(green - sampleG) << " " << abs(blue - sampleB) << endl;
-				//cout << " " << endl;
-
 				if (i % sampleCount == 0 && targetAcquired) { // if ring is complete and targetAcquired
-					xAdjust = (x - width / 2);
-					yAdjust = (y - height / 2);
-
+					xAdjust = (targetPos.x - width / 2);
+					yAdjust = (targetPos.y - height / 2);
 					mouse_event(MOUSEEVENTF_MOVE, xAdjust, yAdjust, 0, 0); // x and y are deltas, not abs coordinates
-					if (reboundCount < reboundMax) {
-						reboundCount++;
-					} else {
-						reboundCount = 0;
-					}
-					if ((GetKeyState(VK_CONTROL) & 0x100) != 0 && reboundCount == reboundMax) {
+
+					if ((GetKeyState(VK_CONTROL) & 0x100) != 0 && xAdjust < 3) {
 						CreateThread(0, 0, (LPTHREAD_START_ROUTINE) shoot, 0, 0, 0);
 					}
 					break;
@@ -180,8 +206,18 @@ void updateResolution() {
 	}
 }
 
+void passiveRecoilCompenstion() {
+	while (1) {
+		while ((GetKeyState(VK_LBUTTON) & 0x100) != 0 && (GetKeyState(VK_CAPITAL) & 0x100) == 0) {
+			Sleep(10);
+			mouse_event(MOUSEEVENTF_MOVE, 0, 4, 0, 0); // x and y are deltas, not abs coordinates
+		}
+	}
+}
+
 int main() {
 	CreateThread(0, 0, (LPTHREAD_START_ROUTINE) updateResolution, 0, 0, 0);
+	// CreateThread(0, 0, (LPTHREAD_START_ROUTINE) passiveRecoilCompenstion, 0, 0, 0);
 	Aim();
 	return 0;
 }
