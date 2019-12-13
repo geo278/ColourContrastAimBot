@@ -71,7 +71,6 @@ bool checkColour(RGBQUAD sample, vector<RGBQUAD> targets) {
 		targetBlue = targets[i].rgbBlue;
 		if (abs(sampleRed - targetRed) < tolerance && 
 			abs(sampleGreen - targetGreen) < tolerance &&
-			//(sampleGreen - sampleRed) < 10 && (sampleGreen - sampleRed) > 0 &&
 			abs(sampleBlue - targetBlue) < tolerance * 2 / 3 ) {
 			result = true;
 			break;
@@ -123,7 +122,8 @@ void Aim() {
 		// angle = 2 * 3.141592654 / 8;
 		angle = 2 * 3.141592654 * 3 / 4;
 		radius = 1;
-		if ((GetKeyState(VK_CONTROL) & 0x100) != 0 && !(GetKeyState(VK_CAPITAL) & 0x8000)) { // while rmb pressed, shift not pressed
+		// if ((GetKeyState(VK_CONTROL) & 0x100) != 0 && !(GetKeyState(VK_CAPITAL) & 0x8000)) { // while CTRL pressed, shift not pressed
+		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && !(GetKeyState(VK_CAPITAL) & 0x8000)) { // while rmb pressed, shift not pressed
 			pixels = capture(a, b);
 			targetAcquired = false;
 			//evadeCrosshairColour = false;
@@ -157,7 +157,7 @@ void Aim() {
 					yAdjust = (targetPos.y - height / 2);
 					mouse_event(MOUSEEVENTF_MOVE, xAdjust, yAdjust, 0, 0); // x and y are deltas, not abs coordinates
 
-					if ((GetKeyState(VK_CONTROL) & 0x100) != 0 && xAdjust < 3) {
+					if ((GetKeyState(VK_CONTROL) & 0x100) != 0 && xAdjust < 3 && yAdjust < 3) {
 						CreateThread(0, 0, (LPTHREAD_START_ROUTINE) shoot, 0, 0, 0);
 					}
 					break;
@@ -168,31 +168,6 @@ void Aim() {
 		Sleep(1);
 	}
 
-/*
-	while (true) {
-		angle = 2 * 3.141592654 / 8;
-		radius = 2;
-		// if ((GetKeyState(0x39) & 0x100) != 0) { // while key 9 pressed
-			// sample colors
-			// cout << "reached" << endl;
-		// }
-		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && !(GetKeyState(VK_SHIFT) & 0x8000)) { // while rmb pressed
-			pixels = capture(a, b);
-
-			for (int i = 0; i < sampleCount * width; i++) {
-
-
-				if (i % 16 == 0) { // found outline
-					mouse_event(MOUSEEVENTF_MOVE, (targetPos.x - width / 2), (targetPos.y - height / 2), 0, 0); // x and y are deltas, not abs coordinates
-					//cout << "BREAK" << endl;
-					break;
-				}
-			}
-			delete[] pixels;
-		}
-		Sleep(1);
-	}
-*/
 }
 void updateResolution() {
 	while (1) {
@@ -206,18 +181,42 @@ void updateResolution() {
 	}
 }
 
-void passiveRecoilCompenstion() {
+void passiveStrafe() {
+	int strafeWidth = 140;
+	INPUT _W_keyDown;
+	_W_keyDown.type = INPUT_KEYBOARD;
+	_W_keyDown.ki.wScan = MapVirtualKey(0x57, MAPVK_VK_TO_VSC); // hardware scan code
+	_W_keyDown.ki.time = 0;
+	_W_keyDown.ki.wVk = 0x57; // virtual-key code
+	_W_keyDown.ki.dwExtraInfo = 0;
+	_W_keyDown.ki.dwFlags = 0; // 0 for key down
+	INPUT _W_keyUp = _W_keyDown;
+	_W_keyUp.ki.dwFlags = KEYEVENTF_KEYUP;
+
+	INPUT _S_keyDown = _W_keyDown;
+	_S_keyDown.ki.wScan = MapVirtualKey(0x53, MAPVK_VK_TO_VSC); // hardware scan code
+	_S_keyDown.ki.wVk = 0x53; // virtual-key code
+	INPUT _S_keyUp = _S_keyDown;
+	_S_keyUp.ki.dwFlags = KEYEVENTF_KEYUP;
 	while (1) {
-		while ((GetKeyState(VK_LBUTTON) & 0x100) != 0 && (GetKeyState(VK_CAPITAL) & 0x100) == 0) {
-			Sleep(10);
-			mouse_event(MOUSEEVENTF_MOVE, 0, 4, 0, 0); // x and y are deltas, not abs coordinates
+		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && (GetKeyState(VK_CAPITAL) & 0x100) == 0) {
+			for (int i = 0; i < 5; i++) {
+				mouse_event(MOUSEEVENTF_MOVE, -500, 0, 0, 0); // x and y are deltas, not abs coordinates
+				Sleep(8);
+				mouse_event(MOUSEEVENTF_MOVE, 1000, 0, 0, 0); // x and y are deltas, not abs coordinates
+				Sleep(8);
+				mouse_event(MOUSEEVENTF_MOVE, -500, 0, 0, 0); // x and y are deltas, not abs coordinates
+			}
+			while ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && (GetKeyState(VK_CAPITAL) & 0x100) == 0) {
+				Sleep(300);
+			}
 		}
 	}
 }
 
 int main() {
 	CreateThread(0, 0, (LPTHREAD_START_ROUTINE) updateResolution, 0, 0, 0);
-	// CreateThread(0, 0, (LPTHREAD_START_ROUTINE) passiveRecoilCompenstion, 0, 0, 0);
+	CreateThread(0, 0, (LPTHREAD_START_ROUTINE) passiveStrafe, 0, 0, 0);
 	Aim();
 	return 0;
 }
