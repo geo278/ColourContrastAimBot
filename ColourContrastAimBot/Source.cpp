@@ -72,7 +72,7 @@ void Aim() {
 	const int sampleCount = 16, tolerance = 30, reboundMax = 3;
 	double radius, angle;
 	int reboundCount = 0;
-	int x, y, index; // 0 indexed from top left
+	int x, y, index, xAdjust, yAdjust; // 0 indexed from top left
 	int red, green, blue;
 
 	bool targetAcquired = false;
@@ -122,14 +122,9 @@ void Aim() {
 				//cout << " " << endl;
 
 				if (i % sampleCount == 0 && targetAcquired) { // if ring is complete and targetAcquired
-					int xAdjust = (x - width / 2);
-					int yAdjust = (y - height / 2);
-					// if (abs(xAdjust) > radius) { xAdjust /= radius; }
-					// else if (xAdjust > 0) { xAdjust = 1; }
-					// else if (xAdjust < 0) { xAdjust = -1; }
-					// if (abs(yAdjust) > radius) { yAdjust /= radius; }
-					// else if (yAdjust > 0) { yAdjust = 1; }
-					// else if (yAdjust < 0) { yAdjust = -1; }
+					xAdjust = (x - width / 2);
+					yAdjust = (y - height / 2);
+
 					mouse_event(MOUSEEVENTF_MOVE, xAdjust, yAdjust, 0, 0); // x and y are deltas, not abs coordinates
 					if (reboundCount < reboundMax) {
 						reboundCount++;
