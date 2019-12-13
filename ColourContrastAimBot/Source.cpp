@@ -69,9 +69,9 @@ void Aim() {
 	// int targetR = 250, targetG = 250, targetB = 250; // bf4 2x irnv
 
 	const int targetR = 180, targetG = 188, targetB = 65; // r6 glaz green highlight
-	int reboundCount = 0;
 	const int sampleCount = 16, tolerance = 30, reboundMax = 3;
 	double radius, angle;
+	int reboundCount = 0;
 	int x, y, index; // 0 indexed from top left
 	int red, green, blue;
 
@@ -107,9 +107,9 @@ void Aim() {
 				if ((abs(red - targetR) < tolerance && // each colour within range
 					abs(green - targetG) < tolerance && 
 					abs(blue - targetB) < tolerance) &&
-					(abs(red - green) - abs(targetR - targetG) < (tolerance / 2 - 2) && // relative hue shift in range
-					abs(green - blue) - abs(targetG - targetB) < (tolerance / 2 - 2) && 
-					abs(blue - red) - abs(targetB - targetR) < (tolerance / 2 - 2))) {
+					(abs(abs(red - green) - abs(targetR - targetG)) < (tolerance / 2 - 2) && // relative hue shift in range
+					abs(abs(green - blue) - abs(targetG - targetB)) < (tolerance / 2 - 2) && 
+					abs(abs(blue - red) - abs(targetB - targetR)) < (tolerance / 2 - 2))) {
 					// brightest = red + green + blue;
 					//targetPos.x = index % width;
 					//targetPos.y = index / width;
