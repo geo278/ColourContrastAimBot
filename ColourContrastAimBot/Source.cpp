@@ -123,7 +123,7 @@ void Aim() {
 		angle = 2 * 3.141592654 * 3 / 4;
 		radius = 1;
 		// if ((GetKeyState(VK_CONTROL) & 0x100) != 0 && !(GetKeyState(VK_CAPITAL) & 0x8000)) { // while CTRL pressed, shift not pressed
-		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && !(GetKeyState(VK_CAPITAL) & 0x8000)) { // while rmb pressed, shift not pressed
+		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && !(GetKeyState(VK_CONTROL) & 0x8000)) { // while rmb pressed, shift not pressed
 			pixels = capture(a, b);
 			targetAcquired = false;
 			//evadeCrosshairColour = false;
@@ -157,8 +157,8 @@ void Aim() {
 					yAdjust = (targetPos.y - height / 2);
 					mouse_event(MOUSEEVENTF_MOVE, xAdjust, yAdjust, 0, 0); // x and y are deltas, not abs coordinates
 
-					if ((GetKeyState(VK_CONTROL) & 0x100) != 0 && xAdjust < 3 && yAdjust < 3) {
-						CreateThread(0, 0, (LPTHREAD_START_ROUTINE) shoot, 0, 0, 0);
+					if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && xAdjust < 3 && yAdjust < 3) {
+						//CreateThread(0, 0, (LPTHREAD_START_ROUTINE) shoot, 0, 0, 0);
 					}
 					break;
 				}
@@ -199,7 +199,7 @@ void passiveStrafe() {
 	INPUT _S_keyUp = _S_keyDown;
 	_S_keyUp.ki.dwFlags = KEYEVENTF_KEYUP;
 	while (1) {
-		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && (GetKeyState(VK_CAPITAL) & 0x100) == 0) {
+		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && (GetKeyState(VK_CONTROL) & 0x100) == 0) {
 			for (int i = 0; i < 5; i++) {
 				mouse_event(MOUSEEVENTF_MOVE, -500, 0, 0, 0); // x and y are deltas, not abs coordinates
 				Sleep(8);
@@ -207,7 +207,7 @@ void passiveStrafe() {
 				Sleep(8);
 				mouse_event(MOUSEEVENTF_MOVE, -500, 0, 0, 0); // x and y are deltas, not abs coordinates
 			}
-			while ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && (GetKeyState(VK_CAPITAL) & 0x100) == 0) {
+			while ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && (GetKeyState(VK_CONTROL) & 0x100) == 0) {
 				Sleep(300);
 			}
 		}
