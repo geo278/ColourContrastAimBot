@@ -60,7 +60,7 @@ void shoot() {
 
 bool checkColour(RGBQUAD sample, vector<RGBQUAD> targets) {
 	bool result = false;
-	int tolerance = 12;
+	int tolerance = 18;
 	int sampleRed = (int)sample.rgbRed;
 	int sampleGreen = (int)sample.rgbGreen;
 	int sampleBlue = (int)sample.rgbBlue;
@@ -99,8 +99,21 @@ void Aim() {
 	targets.push_back(target);
 	target.rgbRed = 181, target.rgbGreen = 189, target.rgbBlue = 123;
 	targets.push_back(target);
+	target.rgbRed = 149, target.rgbGreen = 149, target.rgbBlue = 52;
+	targets.push_back(target);
+	target.rgbRed = 191, target.rgbGreen = 206, target.rgbBlue = 46;
+	targets.push_back(target);
+	target.rgbRed = 153, target.rgbGreen = 170, target.rgbBlue = 88;
+	targets.push_back(target);
+	target.rgbRed = 180, target.rgbGreen = 197, target.rgbBlue = 101;
+	targets.push_back(target);
 
 	// 173 167 130
+
+	//  R: 149 G: 149 B: 52
+	//	R: 191 G: 206 B: 46
+	//	R: 153 G: 170 B: 88
+	//	R: 180 G: 197 B: 101
 
 	// bright colour thermals
 // int sampleR = 255, sampleG = 170, sampleB = 80; // nc infravision
@@ -123,7 +136,7 @@ void Aim() {
 		angle = 2 * 3.141592654 * 3 / 4;
 		radius = 1;
 		// if ((GetKeyState(VK_CONTROL) & 0x100) != 0 && !(GetKeyState(VK_CAPITAL) & 0x8000)) { // while CTRL pressed, shift not pressed
-		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && !(GetKeyState(VK_CONTROL) & 0x8000)) { // while rmb pressed, shift not pressed
+		if ((GetKeyState(VK_CONTROL) & 0x100) != 0 && !(GetKeyState(VK_CAPITAL) & 0x8000)) { // while rmb pressed, shift not pressed
 			pixels = capture(a, b);
 			targetAcquired = false;
 			//evadeCrosshairColour = false;
@@ -157,8 +170,8 @@ void Aim() {
 					yAdjust = (targetPos.y - height / 2);
 					mouse_event(MOUSEEVENTF_MOVE, xAdjust, yAdjust, 0, 0); // x and y are deltas, not abs coordinates
 
-					if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && xAdjust < 3 && yAdjust < 3) {
-						//CreateThread(0, 0, (LPTHREAD_START_ROUTINE) shoot, 0, 0, 0);
+					if ((GetKeyState(VK_CONTROL) & 0x100) != 0 && xAdjust < 3 && yAdjust < 3) {
+						CreateThread(0, 0, (LPTHREAD_START_ROUTINE) shoot, 0, 0, 0);
 					}
 					break;
 				}
@@ -216,7 +229,7 @@ void passiveStrafe() {
 
 int main() {
 	CreateThread(0, 0, (LPTHREAD_START_ROUTINE) updateResolution, 0, 0, 0);
-	CreateThread(0, 0, (LPTHREAD_START_ROUTINE) passiveStrafe, 0, 0, 0);
+	//CreateThread(0, 0, (LPTHREAD_START_ROUTINE) passiveStrafe, 0, 0, 0);
 	Aim();
 	return 0;
 }
