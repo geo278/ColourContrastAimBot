@@ -10,8 +10,10 @@ using namespace std;
 POINT a, b; // top left and bottom right corners
 int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-const int width = 280;
-const int height = 280;
+const int width = 400;
+const int height = 200;
+
+bool bloodHoundUltActive = false;
 
 RGBQUAD * capture(POINT a, POINT b) {
 	// copy screen to bitmap
@@ -65,16 +67,21 @@ bool checkColour(RGBQUAD sample, vector<RGBQUAD> targets) {
 	int sampleGreen = (int)sample.rgbGreen;
 	int sampleBlue = (int)sample.rgbBlue;
 	int targetRed, targetGreen, targetBlue;
-	for (int i = 0; i < targets.size(); i++) {
-		targetRed = targets[i].rgbRed;
-		targetGreen = targets[i].rgbGreen;
-		targetBlue = targets[i].rgbBlue;
-		if (abs(sampleRed - targetRed) < tolerance && 
-			abs(sampleGreen - targetGreen) < tolerance &&
-			abs(sampleBlue - targetBlue) < tolerance * 2 / 3 ) {
-			result = true;
-			break;
-		}
+	//for (int i = 0; i < targets.size(); i++) {
+	//	targetRed = targets[i].rgbRed;
+	//	targetGreen = targets[i].rgbGreen;
+	//	targetBlue = targets[i].rgbBlue;
+	//	if (abs(sampleRed - targetRed) < tolerance && 
+	//		abs(sampleGreen - targetGreen) < tolerance &&
+	//		abs(sampleBlue - targetBlue) < tolerance ) {
+	//		result = true;
+	//		break;
+	//	}
+	//}
+	if (sampleRed > 80 &&
+		sampleGreen > 15 && sampleGreen < 40 &&
+		sampleBlue > 15 && sampleBlue < 40) {
+		result = true;
 	}
 	return result;
 }
@@ -85,35 +92,39 @@ void Aim() {
 
 	vector<RGBQUAD> targets = {};
 	RGBQUAD target;
-	target.rgbRed = 145, target.rgbGreen = 162, target.rgbBlue = 47;
+	target.rgbRed = 161, target.rgbGreen = 22, target.rgbBlue = 42;
 	targets.push_back(target);
-	target.rgbRed = 150, target.rgbGreen = 155, target.rgbBlue = 60;
+	target.rgbRed = 165, target.rgbGreen = 19, target.rgbBlue = 19;
 	targets.push_back(target);
-	target.rgbRed = 173, target.rgbGreen = 177, target.rgbBlue = 60;
+	target.rgbRed = 144, target.rgbGreen = 35, target.rgbBlue = 39;
 	targets.push_back(target);
-	target.rgbRed = 189, target.rgbGreen = 198,	target.rgbBlue = 74;
-	targets.push_back(target);
-	target.rgbRed = 197, target.rgbGreen = 203, target.rgbBlue = 161;
-	targets.push_back(target);
-	target.rgbRed = 194, target.rgbGreen = 193, target.rgbBlue = 141;
-	targets.push_back(target);
-	target.rgbRed = 181, target.rgbGreen = 189, target.rgbBlue = 123;
-	targets.push_back(target);
-	target.rgbRed = 149, target.rgbGreen = 149, target.rgbBlue = 52;
-	targets.push_back(target);
-	target.rgbRed = 191, target.rgbGreen = 206, target.rgbBlue = 46;
-	targets.push_back(target);
-	target.rgbRed = 153, target.rgbGreen = 170, target.rgbBlue = 88;
-	targets.push_back(target);
-	target.rgbRed = 180, target.rgbGreen = 197, target.rgbBlue = 101;
+	target.rgbRed = 122, target.rgbGreen = 35, target.rgbBlue = 32;
 	targets.push_back(target);
 
-	// 173 167 130
+	// R6 Glaz
+	//target.rgbRed = 145, target.rgbGreen = 162, target.rgbBlue = 47;
+	//targets.push_back(target);
+	//target.rgbRed = 150, target.rgbGreen = 155, target.rgbBlue = 60;
+	//targets.push_back(target);
+	//target.rgbRed = 173, target.rgbGreen = 177, target.rgbBlue = 60;
+	//targets.push_back(target);
+	//target.rgbRed = 189, target.rgbGreen = 198,	target.rgbBlue = 74;
+	//targets.push_back(target);
+	//target.rgbRed = 197, target.rgbGreen = 203, target.rgbBlue = 161;
+	//targets.push_back(target);
+	//target.rgbRed = 194, target.rgbGreen = 193, target.rgbBlue = 141;
+	//targets.push_back(target);
+	//target.rgbRed = 181, target.rgbGreen = 189, target.rgbBlue = 123;
+	//targets.push_back(target);
+	//target.rgbRed = 149, target.rgbGreen = 149, target.rgbBlue = 52;
+	//targets.push_back(target);
+	//target.rgbRed = 191, target.rgbGreen = 206, target.rgbBlue = 46;
+	//targets.push_back(target);
+	//target.rgbRed = 153, target.rgbGreen = 170, target.rgbBlue = 88;
+	//targets.push_back(target);
+	//target.rgbRed = 180, target.rgbGreen = 197, target.rgbBlue = 101;
+	//targets.push_back(target);
 
-	//  R: 149 G: 149 B: 52
-	//	R: 191 G: 206 B: 46
-	//	R: 153 G: 170 B: 88
-	//	R: 180 G: 197 B: 101
 
 	// bright colour thermals
 // int sampleR = 255, sampleG = 170, sampleB = 80; // nc infravision
@@ -126,7 +137,7 @@ void Aim() {
 	double radius, angle;
 	int reboundCount = 0;
 	int x, y, index, xAdjust, yAdjust; // 0 indexed from top left
-	int red, green, blue;
+	// int red, green, blue;
 
 	bool targetAcquired = false;
 	//bool evadeCrosshairColour = false;
@@ -136,7 +147,7 @@ void Aim() {
 		angle = 2 * 3.141592654 * 3 / 4;
 		radius = 1;
 		// if ((GetKeyState(VK_CONTROL) & 0x100) != 0 && !(GetKeyState(VK_CAPITAL) & 0x8000)) { // while CTRL pressed, shift not pressed
-		if ((GetKeyState(VK_CONTROL) & 0x100) != 0 && !(GetKeyState(VK_CAPITAL) & 0x8000)) { // while rmb pressed, shift not pressed
+		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && bloodHoundUltActive) { // while rmb pressed
 			pixels = capture(a, b);
 			targetAcquired = false;
 			//evadeCrosshairColour = false;
@@ -227,8 +238,21 @@ void passiveStrafe() {
 	}
 }
 
+void trackBloodHoundUltActive() {
+	while (true) {
+		if ((GetKeyState(0x5A) & 0x100) != 0) {
+			bloodHoundUltActive = true;
+			Sleep(35000);
+			bloodHoundUltActive = false;
+		}
+		Sleep(5);
+	}
+}
+
 int main() {
 	CreateThread(0, 0, (LPTHREAD_START_ROUTINE) updateResolution, 0, 0, 0);
+	CreateThread(0, 0, (LPTHREAD_START_ROUTINE) trackBloodHoundUltActive, 0, 0, 0);
+
 	//CreateThread(0, 0, (LPTHREAD_START_ROUTINE) passiveStrafe, 0, 0, 0);
 	Aim();
 	return 0;
