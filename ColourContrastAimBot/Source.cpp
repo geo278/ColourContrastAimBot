@@ -12,24 +12,31 @@ int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 int screenHeight = GetSystemMetrics(SM_CYSCREEN);
 const int width = 400;
 const int height = 200;
+HWND hWndTarget = NULL;
 
-bool bloodHoundUltActive = false;
+//bool bloodHoundUltActive = false;
 
 RGBQUAD * capture(POINT a, POINT b) {
+
+	if (hWndTarget == NULL) {
+		cout << "FindWindow failed";
+	}
+
 	// copy screen to bitmap
-	HDC     hScreen = GetDC(NULL);
+	HDC     hScreen = GetDC(hWndTarget);
 	HDC     hDC = CreateCompatibleDC(hScreen);
 	HBITMAP hBitmap = CreateCompatibleBitmap(hScreen, abs(b.x - a.x), abs(b.y - a.y));
 	HGDIOBJ old_obj = SelectObject(hDC, hBitmap);
 	BOOL    bRet = BitBlt(hDC, 0, 0, abs(b.x - a.x), abs(b.y - a.y), hScreen, a.x, a.y, SRCCOPY); // BitBlt does the copying
 
-	/*
-	// save bitmap to clipboard
+
+
+	// // save bitmap to clipboard
 	OpenClipboard(NULL);
 	EmptyClipboard();
 	SetClipboardData(CF_BITMAP, hBitmap);
 	CloseClipboard();
-	*/
+
 
 	// Array conversion:
 	RGBQUAD* pixels = new RGBQUAD[width * height];
@@ -53,12 +60,12 @@ RGBQUAD * capture(POINT a, POINT b) {
 	return pixels;
 }
 
-void shoot() {
-	mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0); // start left click
-	Sleep(10);
-	mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0); // finish Left click
-	Sleep(10);
-}
+// void shoot() {
+// 	mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0); // start left click
+// 	Sleep(10);
+// 	mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0); // finish Left click
+// 	Sleep(10);
+// }
 
 bool checkColour(RGBQUAD sample, vector<RGBQUAD> targets) {
 	bool result = false;
@@ -67,21 +74,31 @@ bool checkColour(RGBQUAD sample, vector<RGBQUAD> targets) {
 	int sampleGreen = (int)sample.rgbGreen;
 	int sampleBlue = (int)sample.rgbBlue;
 	int targetRed, targetGreen, targetBlue;
-	//for (int i = 0; i < targets.size(); i++) {
-	//	targetRed = targets[i].rgbRed;
-	//	targetGreen = targets[i].rgbGreen;
-	//	targetBlue = targets[i].rgbBlue;
-	//	if (abs(sampleRed - targetRed) < tolerance && 
-	//		abs(sampleGreen - targetGreen) < tolerance &&
-	//		abs(sampleBlue - targetBlue) < tolerance ) {
-	//		result = true;
-	//		break;
-	//	}
-	//}
-	if (sampleRed > 80 &&
-		sampleGreen > 15 && sampleGreen < 40 &&
-		sampleBlue > 15 && sampleBlue < 40) {
+	for (int i = 0; i < targets.size(); i++) {
+		targetRed = targets[i].rgbRed;
+		targetGreen = targets[i].rgbGreen;
+		targetBlue = targets[i].rgbBlue;
+		if (abs(sampleRed - targetRed) < tolerance && 
+			abs(sampleGreen - targetGreen) < tolerance &&
+			abs(sampleBlue - targetBlue) < tolerance ) {
+			result = true;
+			break;
+		}
+	}
+	return result;
+}
+bool checkColour0(RGBQUAD sample) {
+	bool result = false;
+	int tolerance = 18;
+	int sampleRed = (int)sample.rgbRed;
+	int sampleGreen = (int)sample.rgbGreen;
+	int sampleBlue = (int)sample.rgbBlue;
+
+	if (sampleRed > 220 &&
+		sampleGreen > 200 &&
+		sampleBlue > 150 && sampleBlue < 210) {
 		result = true;
+		cout << "Hello World! asdf";
 	}
 	return result;
 }
@@ -147,7 +164,8 @@ void Aim() {
 		angle = 2 * 3.141592654 * 3 / 4;
 		radius = 1;
 		// if ((GetKeyState(VK_CONTROL) & 0x100) != 0 && !(GetKeyState(VK_CAPITAL) & 0x8000)) { // while CTRL pressed, shift not pressed
-		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && bloodHoundUltActive) { // while rmb pressed
+		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 ) { // while rmb pressed
+
 			pixels = capture(a, b);
 			targetAcquired = false;
 			//evadeCrosshairColour = false;
@@ -169,8 +187,7 @@ void Aim() {
 				//green = (int)pixels[index].rgbGreen;
 				//blue = (int)pixels[index].rgbBlue;
 
-				if (checkColour(pixels[index], targets)) {
-					// brightest = red + green + blue;
+				if (checkColour0(pixels[index])) {
 					targetPos.x = index % width;
 					targetPos.y = index / width;
 					targetAcquired = true;
@@ -181,9 +198,9 @@ void Aim() {
 					yAdjust = (targetPos.y - height / 2);
 					mouse_event(MOUSEEVENTF_MOVE, xAdjust, yAdjust, 0, 0); // x and y are deltas, not abs coordinates
 
-					if ((GetKeyState(VK_CONTROL) & 0x100) != 0 && xAdjust < 3 && yAdjust < 3) {
-						CreateThread(0, 0, (LPTHREAD_START_ROUTINE) shoot, 0, 0, 0);
-					}
+					// if ((GetKeyState(VK_CONTROL) & 0x100) != 0 && xAdjust < 3 && yAdjust < 3) {
+					// 	CreateThread(0, 0, (LPTHREAD_START_ROUTINE) shoot, 0, 0, 0);
+					// }
 					break;
 				}
 			}
@@ -205,55 +222,77 @@ void updateResolution() {
 	}
 }
 
-void passiveStrafe() {
-	int strafeWidth = 140;
-	INPUT _W_keyDown;
-	_W_keyDown.type = INPUT_KEYBOARD;
-	_W_keyDown.ki.wScan = MapVirtualKey(0x57, MAPVK_VK_TO_VSC); // hardware scan code
-	_W_keyDown.ki.time = 0;
-	_W_keyDown.ki.wVk = 0x57; // virtual-key code
-	_W_keyDown.ki.dwExtraInfo = 0;
-	_W_keyDown.ki.dwFlags = 0; // 0 for key down
-	INPUT _W_keyUp = _W_keyDown;
-	_W_keyUp.ki.dwFlags = KEYEVENTF_KEYUP;
+// void passiveStrafe() {
+// 	int strafeWidth = 140;
+// 	INPUT _W_keyDown;
+// 	_W_keyDown.type = INPUT_KEYBOARD;
+// 	_W_keyDown.ki.wScan = MapVirtualKey(0x57, MAPVK_VK_TO_VSC); // hardware scan code
+// 	_W_keyDown.ki.time = 0;
+// 	_W_keyDown.ki.wVk = 0x57; // virtual-key code
+// 	_W_keyDown.ki.dwExtraInfo = 0;
+// 	_W_keyDown.ki.dwFlags = 0; // 0 for key down
+// 	INPUT _W_keyUp = _W_keyDown;
+// 	_W_keyUp.ki.dwFlags = KEYEVENTF_KEYUP;
 
-	INPUT _S_keyDown = _W_keyDown;
-	_S_keyDown.ki.wScan = MapVirtualKey(0x53, MAPVK_VK_TO_VSC); // hardware scan code
-	_S_keyDown.ki.wVk = 0x53; // virtual-key code
-	INPUT _S_keyUp = _S_keyDown;
-	_S_keyUp.ki.dwFlags = KEYEVENTF_KEYUP;
-	while (1) {
-		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && (GetKeyState(VK_CONTROL) & 0x100) == 0) {
-			for (int i = 0; i < 5; i++) {
-				mouse_event(MOUSEEVENTF_MOVE, -500, 0, 0, 0); // x and y are deltas, not abs coordinates
-				Sleep(8);
-				mouse_event(MOUSEEVENTF_MOVE, 1000, 0, 0, 0); // x and y are deltas, not abs coordinates
-				Sleep(8);
-				mouse_event(MOUSEEVENTF_MOVE, -500, 0, 0, 0); // x and y are deltas, not abs coordinates
-			}
-			while ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && (GetKeyState(VK_CONTROL) & 0x100) == 0) {
-				Sleep(300);
-			}
+// 	INPUT _S_keyDown = _W_keyDown;
+// 	_S_keyDown.ki.wScan = MapVirtualKey(0x53, MAPVK_VK_TO_VSC); // hardware scan code
+// 	_S_keyDown.ki.wVk = 0x53; // virtual-key code
+// 	INPUT _S_keyUp = _S_keyDown;
+// 	_S_keyUp.ki.dwFlags = KEYEVENTF_KEYUP;
+// 	while (1) {
+// 		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && (GetKeyState(VK_CONTROL) & 0x100) == 0) {
+// 			for (int i = 0; i < 5; i++) {
+// 				mouse_event(MOUSEEVENTF_MOVE, -500, 0, 0, 0); // x and y are deltas, not abs coordinates
+// 				Sleep(8);
+// 				mouse_event(MOUSEEVENTF_MOVE, 1000, 0, 0, 0); // x and y are deltas, not abs coordinates
+// 				Sleep(8);
+// 				mouse_event(MOUSEEVENTF_MOVE, -500, 0, 0, 0); // x and y are deltas, not abs coordinates
+// 			}
+// 			while ((GetKeyState(VK_RBUTTON) & 0x100) != 0 && (GetKeyState(VK_CONTROL) & 0x100) == 0) {
+// 				Sleep(300);
+// 			}
+// 		}
+// 	}
+// }
+
+// void trackBloodHoundUltActive() {
+// 	while (true) {
+// 		if ((GetKeyState(0x5A) & 0x100) != 0) {
+// 			bloodHoundUltActive = true;
+// 			Sleep(35000);
+// 			bloodHoundUltActive = false;
+// 		}
+// 		Sleep(5);
+// 	}
+// }
+
+// Callback function. It will be called by EnumWindows function as many times as there are windows
+BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
+{
+	if (IsWindowVisible(hwnd)) // check whether window is visible
+	{
+		char wnd_title[256];
+		GetWindowText(hwnd, wnd_title, sizeof(wnd_title));
+		cout << wnd_title << endl;
+
+		string str(wnd_title);
+		string substr("2042");
+		if (str.find(substr)) {
+			hWndTarget = hwnd;
 		}
 	}
-}
-
-void trackBloodHoundUltActive() {
-	while (true) {
-		if ((GetKeyState(0x5A) & 0x100) != 0) {
-			bloodHoundUltActive = true;
-			Sleep(35000);
-			bloodHoundUltActive = false;
-		}
-		Sleep(5);
-	}
+	return true; // function must return true if you want to continue enumeration
 }
 
 int main() {
+	EnumWindows(EnumWindowsProc, 0);
 	CreateThread(0, 0, (LPTHREAD_START_ROUTINE) updateResolution, 0, 0, 0);
-	CreateThread(0, 0, (LPTHREAD_START_ROUTINE) trackBloodHoundUltActive, 0, 0, 0);
-
 	//CreateThread(0, 0, (LPTHREAD_START_ROUTINE) passiveStrafe, 0, 0, 0);
 	Aim();
 	return 0;
 }
+
+
+
+
+
