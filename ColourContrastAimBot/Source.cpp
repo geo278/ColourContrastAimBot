@@ -24,6 +24,11 @@ RGBQUAD * capture(POINT a, POINT b) {
 
 	// copy screen to bitmap
 	HDC     hScreen = GetDC(hWndTarget);
+
+	if (hScreen == NULL) {
+		cout << "GetDC failed";
+	}
+
 	HDC     hDC = CreateCompatibleDC(hScreen);
 	HBITMAP hBitmap = CreateCompatibleBitmap(hScreen, abs(b.x - a.x), abs(b.y - a.y));
 	HGDIOBJ old_obj = SelectObject(hDC, hBitmap);
@@ -276,9 +281,10 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam)
 		cout << wnd_title << endl;
 
 		string str(wnd_title);
-		string substr("2042");
-		if (str.find(substr)) {
+		string substr("Visual Studio Code");
+		if (str.find(substr) != std::string::npos) {
 			hWndTarget = hwnd;
+			cout << "CHECK VALUE: " << wnd_title << endl;
 		}
 	}
 	return true; // function must return true if you want to continue enumeration
